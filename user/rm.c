@@ -8,6 +8,8 @@ main(int argc, char *argv[])
   int i;
 
   if(argc < 2){
+    // printf writes to the standard output;
+    // fprintf can write to any steam, this is 2 the standard error;
     fprintf(2, "Usage: rm files...\n");
     exit(1);
   }

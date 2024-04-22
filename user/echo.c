@@ -8,6 +8,7 @@ main(int argc, char *argv[])
   int i;
 
   for(i = 1; i < argc; i++){
+    //fd = 1 即为标准输出，既输出到终端
     write(1, argv[i], strlen(argv[i]));
     if(i + 1 < argc){
       write(1, " ", 1);

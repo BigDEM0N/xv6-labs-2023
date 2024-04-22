@@ -15,20 +15,32 @@ grep(char *pattern, int fd)
   char *p, *q;
 
   m = 0;
+  // buf+m append to the buffer，read max to the size of buffer-1
   while((n = read(fd, buf+m, sizeof(buf)-m-1)) > 0){
+    // calculate the offset in buffer
     m += n;
+    // append the EOF
     buf[m] = '\0';
     p = buf;
+    // strchr is used to find a specific char int string p
+    // q = strchr(p,'\n') means to find if the user pressed 'Enter'.If so,the input is ended,or else skip
     while((q = strchr(p, '\n')) != 0){
+      //let the '\n' in p be 0?
       *q = 0;
       if(match(pattern, p)){
         *q = '\n';
+        // if match, write buffer[0]~buffer[q-p] to console
         write(1, p, q+1 - p);
       }
+      //let the point be the buffer[q+1],whitch means to read next input;
       p = q+1;
     }
+    // m represents the char numbers in buffer.
+    // So after we use the first q-p+1 char to match,we need to slide the data behind;
     if(m > 0){
+      // we have m chars left;
       m -= p - buf;
+      // copy them to buffer[0];
       memmove(buf, p, m);
     }
   }
@@ -40,17 +52,22 @@ main(int argc, char *argv[])
   int fd, i;
   char *pattern;
 
+  // If we have only one arg,it means wrong input;
   if(argc <= 1){
     fprintf(2, "usage: grep pattern [file ...]\n");
     exit(1);
   }
+  // If we have more than one arg,we have the second arg as pattern;
+  // ps: the first arg is "grep";
   pattern = argv[1];
 
+  // If we have only two args,we do one time grep;
   if(argc <= 2){
     grep(pattern, 0);
     exit(0);
   }
 
+  // let the pattern match to the other args ,not string but maybe file?;
   for(i = 2; i < argc; i++){
     if((fd = open(argv[i], O_RDONLY)) < 0){
       printf("grep: cannot open %s\n", argv[i]);
