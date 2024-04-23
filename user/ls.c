@@ -4,9 +4,11 @@
 #include "kernel/fs.h"
 #include "kernel/fcntl.h"
 
+// 输入一个path，返回这个path的最后一个/后面的文件名
 char*
 fmtname(char *path)
 {
+  // DIRSIZ is defined in fs.h,whose default value is 14;
   static char buf[DIRSIZ+1];
   char *p;
 
@@ -36,6 +38,8 @@ ls(char *path)
     return;
   }
 
+  // fstat is used to tell the fd is a dir,file or device;
+  // write the state of the fd into st;
   if(fstat(fd, &st) < 0){
     fprintf(2, "ls: cannot stat %s\n", path);
     close(fd);
@@ -49,13 +53,20 @@ ls(char *path)
     break;
 
   case T_DIR:
+  //If the path leads to a dir;
     if(strlen(path) + 1 + DIRSIZ + 1 > sizeof buf){
       printf("ls: path too long\n");
       break;
     }
+    // copy the path to buffer;
     strcpy(buf, path);
+
+    // append '/' to the buffer;
     p = buf+strlen(buf);
     *p++ = '/';
+
+    // read the dir/file under this fd(path) into de(dirent);
+    // Circulate to read;
     while(read(fd, &de, sizeof(de)) == sizeof(de)){
       if(de.inum == 0)
         continue;
